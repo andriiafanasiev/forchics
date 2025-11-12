@@ -13045,7 +13045,7 @@ header--bordered " role="banner">
       };
 
       // Змінна для зберігання товарів у кошику
-      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      let cart = JSON.parse(sessionStorage.getItem('cart')) || [];
 
       // Функція для отримання назви продукту
       function getProductName() {
@@ -13125,7 +13125,7 @@ header--bordered " role="banner">
             const index = parseInt(this.getAttribute('data-index'));
             if (cart[index].quantity > 1) {
               cart[index].quantity--;
-              localStorage.setItem('cart', JSON.stringify(cart));
+              sessionStorage.setItem('cart', JSON.stringify(cart));
               renderCart();
             }
           });
@@ -13135,7 +13135,7 @@ header--bordered " role="banner">
           btn.addEventListener('click', function () {
             const index = parseInt(this.getAttribute('data-index'));
             cart[index].quantity++;
-            localStorage.setItem('cart', JSON.stringify(cart));
+            sessionStorage.setItem('cart', JSON.stringify(cart));
             renderCart();
           });
         });
@@ -13144,7 +13144,7 @@ header--bordered " role="banner">
           btn.addEventListener('click', function () {
             const index = parseInt(this.getAttribute('data-index'));
             cart.splice(index, 1);
-            localStorage.setItem('cart', JSON.stringify(cart));
+            sessionStorage.setItem('cart', JSON.stringify(cart));
             renderCart();
           });
         });
@@ -13239,7 +13239,7 @@ header--bordered " role="banner">
           // Навіть якщо variantId однаковий, додаємо як окремий товар
           cart.push(cartItem);
 
-          localStorage.setItem('cart', JSON.stringify(cart));
+          sessionStorage.setItem('cart', JSON.stringify(cart));
           renderCart();
 
           // Відкриваємо кошик
@@ -13342,7 +13342,7 @@ header--bordered " role="banner">
           alert('Дякуємо за замовлення! Ми зв\'яжемося з вами найближчим часом.');
 
           cart = [];
-          localStorage.removeItem('cart');
+          sessionStorage.removeItem('cart');
           customerOrderFormModal.reset();
           renderCart();
           closeOrderModalFunc();
@@ -13357,14 +13357,6 @@ header--bordered " role="banner">
 
       // Початкове відображення кошика
       renderCart();
-
-      // Відстежуємо зміни в localStorage (якщо кошик змінився в іншій вкладці)
-      window.addEventListener('storage', function (e) {
-        if (e.key === 'cart') {
-          cart = JSON.parse(e.newValue) || [];
-          renderCart();
-        }
-      });
     });
   </script>
 </body>
