@@ -2773,24 +2773,154 @@ header--bordered " role="banner">
 
       <header class="drawer__header">
         <p class="drawer__title heading h6">
+          Ваш кошик</p>
 
-          Shopping Cart</p>
-
-        <button type="button" class="drawer__close-button tap-area" data-action="close" title="Close"><svg
+        <button type="button" class="drawer__close-button tap-area" data-action="close" title="Закрити"><svg
             focusable="false" width="14" height="14" class="icon icon--close   " viewBox="0 0 14 14">
             <path d="M13 13L1 1M13 1L1 13" stroke="currentColor" stroke-width="2" fill="none"></path>
           </svg></button>
       </header>
       <div class="drawer__content drawer__content--center">
-        <p>Your cart is empty</p>
+        <!-- Пустий кошик -->
+        <div id="empty-cart-message" style="text-align: center; padding: 40px 20px;">
+          <p style="margin-bottom: 20px;">Ваш кошик порожній</p>
+          <div class="button-wrapper">
+            <a href="https://forchics.com/collections/all" class="button button--primary">Почати покупки</a>
+          </div>
+        </div>
 
-        <div class="button-wrapper">
-          <a href="https://forchics.com/collections/all" class="button button--primary">Start shopping</a>
+        <!-- Кошик з товарами -->
+        <div id="cart-items-container" style="display: none;">
+          <div id="cart-items-list" style="padding: 20px;">
+            <!-- Товари будуть додані динамічно -->
+          </div>
+
+          <!-- Підсумок -->
+          <div id="cart-summary" style="padding: 20px; border-top: 1px solid rgb(var(--root-border-color));">
+            <div
+              style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 18px; font-weight: 700;">
+              <span>Разом:</span>
+              <span id="cart-total">0 грн.</span>
+            </div>
+
+            <!-- Кнопка "Замовити" -->
+            <button type="button" id="checkout-button-cart"
+              style="width: 100%; padding: 15px; background: rgb(var(--root-primary-button-background)); color: rgb(var(--root-primary-button-text-color)); border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; min-height: 65px;">
+              Замовити
+            </button>
+          </div>
         </div>
       </div>
     </cart-drawer>
 
+    <!-- Модальне вікно з формою замовлення -->
+    <div id="order-modal-overlay"
+      style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 10000; overflow-y: auto;">
+      <div
+        style="position: relative; min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+        <div id="order-modal"
+          style="position: relative; background: #fff; border-radius: 12px; padding: 30px; max-width: 500px; width: 100%; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); margin: auto;">
+          <button type="button" id="close-order-modal"
+            style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; font-size: 24px; cursor: pointer; color: #666; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; padding: 0;">
+            ×
+          </button>
+          <h2 style="margin: 0 0 25px 0; font-size: 24px; font-weight: 700; color: #000;">Введіть ваші дані</h2>
+          <form id="customer-order-form-modal">
+            <div style="margin-bottom: 20px;">
+              <label for="customer-name-modal"
+                style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #000;">Ім'я:</label>
+              <input type="text" id="customer-name-modal" name="name" required placeholder="Введіть ваше ім'я"
+                style="width: 100%; padding: 14px; border: 1px solid rgb(var(--root-border-color)); border-radius: 6px; font-size: 16px; box-sizing: border-box; font-family: inherit;">
+            </div>
+            <div style="margin-bottom: 25px;">
+              <label for="customer-phone-modal"
+                style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #000;">Номер
+                телефону:</label>
+              <input type="tel" id="customer-phone-modal" name="phone" required placeholder="+380XXXXXXXXX"
+                style="width: 100%; padding: 14px; border: 1px solid rgb(var(--root-border-color)); border-radius: 6px; font-size: 16px; box-sizing: border-box; font-family: inherit;">
+            </div>
+            <button type="submit" id="buy-button-modal"
+              style="width: 100%; padding: 16px; background: rgb(var(--root-primary-button-background)); color: rgb(var(--root-primary-button-text-color)); border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; min-height: 50px;">
+              Підтвердити замовлення
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <style>
+      /* Адаптивність для модального вікна */
+      @media (max-width: 768px) {
+        #order-modal-overlay>div {
+          padding: 10px;
+          align-items: flex-start;
+          padding-top: 20px;
+        }
+
+        #order-modal {
+          padding: 20px;
+          max-width: 100%;
+          margin: 0;
+          border-radius: 12px 12px 0 0;
+        }
+
+        #order-modal h2 {
+          font-size: 20px;
+          margin-bottom: 20px;
+        }
+
+        #close-order-modal {
+          top: 10px;
+          right: 10px;
+          font-size: 28px;
+        }
+
+        #order-modal input {
+          font-size: 16px !important;
+          /* Запобігає збільшенню на iOS */
+        }
+      }
+
+      /* Адаптивність для кошика */
+      @media (max-width: 768px) {
+        .cart-item {
+          flex-wrap: wrap;
+          gap: 10px !important;
+        }
+
+        .cart-item>div:first-child {
+          width: 60px !important;
+          height: 60px !important;
+        }
+
+        .cart-item>div:nth-child(2) {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .cart-item>div:nth-child(2)>div:first-child {
+          font-size: 14px !important;
+        }
+
+        .cart-item>div:nth-child(2)>div:nth-child(2) {
+          font-size: 12px !important;
+        }
+
+        .cart-item>div:nth-child(2)>div:nth-child(3) {
+          font-size: 14px !important;
+        }
+
+        #cart-summary {
+          padding: 15px !important;
+        }
+
+        #checkout-button-cart {
+          font-size: 14px !important;
+          padding: 12px !important;
+          min-height: 50px !important;
+        }
+      }
+
       .cart-payment-icon {
         padding: 15px 0 0px;
       }
@@ -4454,16 +4584,16 @@ header--bordered " role="banner">
                         id="product-select-template--19430082248756__main-8689954488372" name="id"
                         form="product-form-template--19430082248756__main-8689954488372">
                         <option selected="selected" value="47245328842804" data-sku="FL1.1">
-                          1 Пляшка - <span class=money>$24</span>
+                          1 Пляшка - 960 грн.
                         </option>
                         <option value="47245328875572" data-sku="FL2.2">
-                          2 Пляшки - <span class=money>$43</span>
+                          2 Пляшки - 1720 грн.
                         </option>
                         <option value="47245328908340" data-sku="FL3.3">
-                          3 Пляшки - <span class=money>$59</span>
+                          3 Пляшки - 2360 грн.
                         </option>
                         <option value="47245328941108" data-sku="FL4.4">
-                          4 Пляшки - <span class=money>$70</span>
+                          4 Пляшки - 2800 грн.
                         </option>
                       </select><svg focusable="false" width="12" height="8" class="icon icon--chevron   "
                         viewBox="0 0 12 8">
@@ -5625,9 +5755,11 @@ header--bordered " role="banner">
 
                     <div class="free-gifts-properties-js hide hidden" hidden></div>
 
+                    <input type="hidden" id="product-quantity" name="quantity" value="1">
+
                     <product-payment-container form-id="product-form-template--19430082248756__main-8689954488372"
                       id="MainPaymentContainer" class="product-form__payment-container">
-                      <button id="AddToCart" type="submit" is="loader-button" data-use-primary
+                      <button id="AddToCart" type="button" is="loader-button" data-use-primary
                         data-product-add-to-cart-button data-button-content="Додати до кошика"
                         class="product-form__add-button button button--primary button--full">
                         Додати до кошика
@@ -5635,6 +5767,31 @@ header--bordered " role="banner">
                       value="8689954488372" /><input type="hidden" name="section-id"
                       value="template--19430082248756__main" />
                   </form>
+
+                  <!-- Форма даних клієнта -->
+                  <div id="customer-form-container"
+                    style="display: none; margin-top: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">
+                    <h3 style="margin-bottom: 15px; font-size: 18px; font-weight: 700;">Дані для замовлення</h3>
+                    <form id="customer-order-form">
+                      <div style="margin-bottom: 15px;">
+                        <label for="customer-name"
+                          style="display: block; margin-bottom: 5px; font-weight: 600; color: #000;">Ім'я:</label>
+                        <input type="text" id="customer-name" name="name" required placeholder="Введіть ваше ім'я"
+                          style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;">
+                      </div>
+                      <div style="margin-bottom: 20px;">
+                        <label for="customer-phone"
+                          style="display: block; margin-bottom: 5px; font-weight: 600; color: #000;">Номер
+                          телефону:</label>
+                        <input type="tel" id="customer-phone" name="phone" required placeholder="+380XXXXXXXXX"
+                          style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; box-sizing: border-box;">
+                      </div>
+                      <button type="submit" id="buy-button"
+                        style="width: 100%; padding: 15px; background: #000; color: #fff; border: none; border-radius: 4px; font-size: 16px; font-weight: 700; cursor: pointer;">
+                        Купити
+                      </button>
+                    </form>
+                  </div>
                 </div><store-pickup form-id="product-form-template--19430082248756__main-8689954488372"
                   class="product-form__store-availability-container"></store-pickup>
                 <div class="order-info-and-payments">
@@ -10661,15 +10818,408 @@ header--bordered " role="banner">
                 </div>
               </div>
               <div class="product-written-review review-content-item" id="written_review">
-                <!--Stamped - Begin Main Widget -->
-                <div id="stamped-main-widget" data-product-id="8689954488372" data-name="Eyelash Growth Serum"
-                  data-url="https://forchics.com/products/lash-serum"
-                  data-image-url="//forchics.com/cdn/shop/files/Forlash-EyelashEnhancingSerum-ForChics2_1a26ee62-eb0a-4409-bc5a-b3e8750cdc7e_large.webp%3Fv=1762868873"
-                  data-description="&lt;p&gt; &lt;/p&gt;
-&lt;p data-mce-fragment=&quot;1&quot; class=&quot;p1&quot;&gt;&lt;meta charset=&quot;utf-8&quot;&gt;Powerful peptides and plant botanicals to help recover from thinning lashes. &lt;/p&gt;"
-                  data-product-sku="lash-serum" data-product-type="FORLASH">
+                <style>
+                  .static-reviews-container {
+                    padding: 40px 20px;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                  }
+
+                  .static-review-item {
+                    background: #fff;
+                    border: 1px solid rgb(var(--root-border-color));
+                    border-radius: 8px;
+                    padding: 25px;
+                    margin-bottom: 20px;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                  }
+
+                  .static-review-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    margin-bottom: 15px;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                  }
+
+                  .static-review-author {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                  }
+
+                  .static-review-avatar {
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #F86C84 0%, #ff9a9e 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    font-weight: 700;
+                    font-size: 20px;
+                    flex-shrink: 0;
+                  }
+
+                  .static-review-author-info {
+                    display: flex;
+                    flex-direction: column;
+                  }
+
+                  .static-review-author-name {
+                    font-weight: 700;
+                    font-size: 16px;
+                    color: #000;
+                    margin-bottom: 4px;
+                  }
+
+                  .static-review-date {
+                    font-size: 13px;
+                    color: #666;
+                  }
+
+                  .static-review-rating {
+                    display: flex;
+                    gap: 3px;
+                    align-items: center;
+                  }
+
+                  .static-review-star {
+                    color: #FFD700;
+                    font-size: 18px;
+                  }
+
+                  .static-review-star.empty {
+                    color: #ddd;
+                  }
+
+                  .static-review-text {
+                    font-size: 15px;
+                    line-height: 1.6;
+                    color: #333;
+                    margin-bottom: 15px;
+                  }
+
+                  .static-review-verified {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    font-size: 12px;
+                    color: #31943A;
+                    font-weight: 600;
+                  }
+
+                  @media (max-width: 768px) {
+                    .static-reviews-container {
+                      padding: 20px 15px;
+                    }
+
+                    .static-review-item {
+                      padding: 20px;
+                    }
+
+                    .static-review-header {
+                      flex-direction: column;
+                    }
+
+                    .static-review-author {
+                      width: 100%;
+                    }
+                  }
+                </style>
+                <div class="static-reviews-container">
+                  <div class="static-review-item">
+                    <div class="static-review-header">
+                      <div class="static-review-author">
+                        <div class="static-review-avatar">МК</div>
+                        <div class="static-review-author-info">
+                          <div class="static-review-author-name">Марія К.</div>
+                          <div class="static-review-date">2 тижні тому</div>
+                        </div>
+                      </div>
+                      <div class="static-review-rating">
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                      </div>
+                    </div>
+                    <div class="static-review-text">
+                      "Не могла повірити результатам! За місяць мої вії стали набагато довшими та густішими. Тепер не
+                      потрібна туш щодня. Рекомендую всім!"
+                    </div>
+                    <div class="static-review-verified">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#31943A" />
+                      </svg>
+                      Підтверджена покупка
+                    </div>
+                  </div>
+
+                  <div class="static-review-item">
+                    <div class="static-review-header">
+                      <div class="static-review-author">
+                        <div class="static-review-avatar">ОП</div>
+                        <div class="static-review-author-info">
+                          <div class="static-review-author-name">Олена П.</div>
+                          <div class="static-review-date">3 тижні тому</div>
+                        </div>
+                      </div>
+                      <div class="static-review-rating">
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                      </div>
+                    </div>
+                    <div class="static-review-text">
+                      "Використовую вже другий місяць. Вії стали помітно довшими, особливо на зовнішніх кутах. Наношу
+                      перед сном, дуже зручно. Результат перевершив очікування!"
+                    </div>
+                    <div class="static-review-verified">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#31943A" />
+                      </svg>
+                      Підтверджена покупка
+                    </div>
+                  </div>
+
+                  <div class="static-review-item">
+                    <div class="static-review-header">
+                      <div class="static-review-author">
+                        <div class="static-review-avatar">АВ</div>
+                        <div class="static-review-author-info">
+                          <div class="static-review-author-name">Анна В.</div>
+                          <div class="static-review-date">1 місяць тому</div>
+                        </div>
+                      </div>
+                      <div class="static-review-rating">
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                      </div>
+                    </div>
+                    <div class="static-review-text">
+                      "Після нарощування мої вії були дуже пошкоджені. Ця сироватка допомогла їх відновити! За 6 тижнів
+                      вони виглядають набагато краще, ніж раніше. Дуже задоволена!"
+                    </div>
+                    <div class="static-review-verified">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#31943A" />
+                      </svg>
+                      Підтверджена покупка
+                    </div>
+                  </div>
+
+                  <div class="static-review-item">
+                    <div class="static-review-header">
+                      <div class="static-review-author">
+                        <div class="static-review-avatar">КС</div>
+                        <div class="static-review-author-info">
+                          <div class="static-review-author-name">Катерина С.</div>
+                          <div class="static-review-date">2 тижні тому</div>
+                        </div>
+                      </div>
+                      <div class="static-review-rating">
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                      </div>
+                    </div>
+                    <div class="static-review-text">
+                      "Купила на спробу, не очікувала такого результату! Вії стали густішими та сильнішими. Навіть моя
+                      мама помітила різницю. Обов'язково замовлю ще!"
+                    </div>
+                    <div class="static-review-verified">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#31943A" />
+                      </svg>
+                      Підтверджена покупка
+                    </div>
+                  </div>
+
+                  <div class="static-review-item">
+                    <div class="static-review-header">
+                      <div class="static-review-author">
+                        <div class="static-review-avatar">ВМ</div>
+                        <div class="static-review-author-info">
+                          <div class="static-review-author-name">Вікторія М.</div>
+                          <div class="static-review-date">3 тижні тому</div>
+                        </div>
+                      </div>
+                      <div class="static-review-rating">
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                      </div>
+                    </div>
+                    <div class="static-review-text">
+                      "Використовую вже 2 місяці. Результат вражає! Мої вії завжди були короткими, а тепер вони довгі та
+                      красиві. Сироватка не викликає подразнення, легко наноситься."
+                    </div>
+                    <div class="static-review-verified">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#31943A" />
+                      </svg>
+                      Підтверджена покупка
+                    </div>
+                  </div>
+
+                  <div class="static-review-item">
+                    <div class="static-review-header">
+                      <div class="static-review-author">
+                        <div class="static-review-avatar">НТ</div>
+                        <div class="static-review-author-info">
+                          <div class="static-review-author-name">Наталія Т.</div>
+                          <div class="static-review-date">1 місяць тому</div>
+                        </div>
+                      </div>
+                      <div class="static-review-rating">
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                      </div>
+                    </div>
+                    <div class="static-review-text">
+                      "Найкраща сироватка, яку я коли-небудь використовувала! За 4 тижні помітила значну різницю. Вії
+                      стали довшими, густішими та набагато здоровішими. Варто кожної копійки!"
+                    </div>
+                    <div class="static-review-verified">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#31943A" />
+                      </svg>
+                      Підтверджена покупка
+                    </div>
+                  </div>
+
+                  <div class="static-review-item">
+                    <div class="static-review-header">
+                      <div class="static-review-author">
+                        <div class="static-review-avatar">ІД</div>
+                        <div class="static-review-author-info">
+                          <div class="static-review-author-name">Ірина Д.</div>
+                          <div class="static-review-date">2 тижні тому</div>
+                        </div>
+                      </div>
+                      <div class="static-review-rating">
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                      </div>
+                    </div>
+                    <div class="static-review-text">
+                      "Після хіміотерапії мої вії майже зникли. Ця сироватка допомогла їм відрости! За 2 місяці вони
+                      виглядають набагато краще. Дуже вдячна за цей продукт!"
+                    </div>
+                    <div class="static-review-verified">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#31943A" />
+                      </svg>
+                      Підтверджена покупка
+                    </div>
+                  </div>
+
+                  <div class="static-review-item">
+                    <div class="static-review-header">
+                      <div class="static-review-author">
+                        <div class="static-review-avatar">ТБ</div>
+                        <div class="static-review-author-info">
+                          <div class="static-review-author-name">Тетяна Б.</div>
+                          <div class="static-review-date">3 тижні тому</div>
+                        </div>
+                      </div>
+                      <div class="static-review-rating">
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                      </div>
+                    </div>
+                    <div class="static-review-text">
+                      "Купила для мами на день народження, але спробувала сама. Результат настільки вражає, що замовляю
+                      ще для себе! Вії стали довшими та сильнішими за місяць використання."
+                    </div>
+                    <div class="static-review-verified">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#31943A" />
+                      </svg>
+                      Підтверджена покупка
+                    </div>
+                  </div>
+
+                  <div class="static-review-item">
+                    <div class="static-review-header">
+                      <div class="static-review-author">
+                        <div class="static-review-avatar">ЮК</div>
+                        <div class="static-review-author-info">
+                          <div class="static-review-author-name">Юлія К.</div>
+                          <div class="static-review-date">1 місяць тому</div>
+                        </div>
+                      </div>
+                      <div class="static-review-rating">
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                      </div>
+                    </div>
+                    <div class="static-review-text">
+                      "Спочатку була скептична, але після першого місяця помітила реальну різницю! Вії стали довшими та
+                      густішими. Тепер не можу уявити свій догляд без цієї сироватки."
+                    </div>
+                    <div class="static-review-verified">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#31943A" />
+                      </svg>
+                      Підтверджена покупка
+                    </div>
+                  </div>
+
+                  <div class="static-review-item">
+                    <div class="static-review-header">
+                      <div class="static-review-author">
+                        <div class="static-review-avatar">СГ</div>
+                        <div class="static-review-author-info">
+                          <div class="static-review-author-name">Світлана Г.</div>
+                          <div class="static-review-date">2 тижні тому</div>
+                        </div>
+                      </div>
+                      <div class="static-review-rating">
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                        <span class="static-review-star">★</span>
+                      </div>
+                    </div>
+                    <div class="static-review-text">
+                      "Використовую вже третій місяць. Мої вії завжди були рідкими, а тепер вони виглядають набагато
+                      краще! Сироватка легко наноситься, не липка, швидко всихає. Результат перевершив очікування!"
+                    </div>
+                    <div class="static-review-verified">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#31943A" />
+                      </svg>
+                      Підтверджена покупка
+                    </div>
+                  </div>
                 </div>
-                <!-- Stamped - End Main Widget -->
 
 
 
@@ -12466,6 +13016,357 @@ header--bordered " role="banner">
 
 
   </div>
+
+  <!-- JavaScript для обробки кошика та форми -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Елементи форми продукту
+      const quantityInput = document.getElementById('product-quantity');
+      const addToCartButton = document.getElementById('AddToCart');
+      const productForm = document.getElementById('product-form-template--19430082248756__main-8689954488372');
+
+      // Елементи кошика
+      const emptyCartMessage = document.getElementById('empty-cart-message');
+      const cartItemsContainer = document.getElementById('cart-items-container');
+      const cartItemsList = document.getElementById('cart-items-list');
+      const cartTotal = document.getElementById('cart-total');
+      const customerOrderFormCart = document.getElementById('customer-order-form-cart');
+      const cartCount = document.querySelector('cart-count');
+
+      // Курс валют: 1 USD = 40 UAH
+      const USD_TO_UAH = 40;
+
+      // Дані про варіанти продукту (ціни в USD, конвертуємо в гривні)
+      const variantPrices = {
+        '47245328842804': { price: 24 * USD_TO_UAH, comparePrice: 39 * USD_TO_UAH, name: '1 пляшка' },
+        '47245328875572': { price: 43 * USD_TO_UAH, comparePrice: 78 * USD_TO_UAH, name: '2 пляшки' },
+        '47245328908340': { price: 59 * USD_TO_UAH, comparePrice: 117 * USD_TO_UAH, name: '3 пляшки' },
+        '47245328941108': { price: 70 * USD_TO_UAH, comparePrice: 149 * USD_TO_UAH, name: '4 пляшки' }
+      };
+
+      // Змінна для зберігання товарів у кошику
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+      // Функція для отримання назви продукту
+      function getProductName() {
+        return 'Eyelash Growth Serum';
+      }
+
+      // Функція для відображення кошика
+      function renderCart() {
+        if (cart.length === 0) {
+          emptyCartMessage.style.display = 'block';
+          cartItemsContainer.style.display = 'none';
+          if (cartCount) cartCount.textContent = '0';
+          return;
+        }
+
+        emptyCartMessage.style.display = 'none';
+        cartItemsContainer.style.display = 'block';
+        if (cartCount) cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+        // Очищаємо список товарів
+        cartItemsList.innerHTML = '';
+
+        let totalPrice = 0;
+
+        // Додаємо товари
+        cart.forEach((item, index) => {
+          // Переконуємося, що variantId - це рядок
+          const variantIdStr = String(item.variantId);
+          const variant = variantPrices[variantIdStr];
+
+          if (!variant) {
+            console.error('Variant not found for variantId:', variantIdStr, 'Available:', Object.keys(variantPrices));
+            return;
+          }
+
+          const itemPrice = variant.price * item.quantity;
+          totalPrice += itemPrice;
+
+          const productImage = 'https://forchics.com/cdn/shop/files/Forlash-EyelashEnhancingSerum-ForChics2_1a26ee62-eb0a-4409-bc5a-b3e8750cdc7e.webp?v=1762868873&width=100';
+          const cartItemHTML = `
+            <div class="cart-item" style="display: flex; gap: 15px; padding: 15px 0; border-bottom: 1px solid rgb(var(--root-border-color));">
+              <div style="width: 80px; height: 80px; flex-shrink: 0;">
+                <img src="${productImage}" alt="${getProductName()}" 
+                  style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
+              </div>
+              <div style="flex: 1;">
+                <div style="font-weight: 600; margin-bottom: 5px;">${getProductName()}</div>
+                <div style="font-size: 14px; color: #666; margin-bottom: 10px;">${variant.name}</div>
+                <div style="font-weight: 700; font-size: 16px;">${Math.round(itemPrice)} грн.</div>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px; border: 1px solid rgb(var(--root-border-color)); border-radius: 4px; padding: 5px;">
+                  <button type="button" class="cart-item-decrease" data-index="${index}" 
+                    style="width: 30px; height: 30px; border: none; background: transparent; cursor: pointer; font-size: 18px;">-</button>
+                  <span class="cart-item-quantity" style="min-width: 30px; text-align: center; font-weight: 600;">${item.quantity}</span>
+                  <button type="button" class="cart-item-increase" data-index="${index}" 
+                    style="width: 30px; height: 30px; border: none; background: transparent; cursor: pointer; font-size: 18px;">+</button>
+                </div>
+                <button type="button" class="cart-item-remove" data-index="${index}" 
+                  style="background: transparent; border: none; cursor: pointer; padding: 5px; color: #999;">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M4 4L12 12M4 12L12 4" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          `;
+          cartItemsList.insertAdjacentHTML('beforeend', cartItemHTML);
+        });
+
+        // Оновлюємо загальну ціну
+        cartTotal.textContent = Math.round(totalPrice) + ' грн.';
+
+        // Додаємо обробники подій для кнопок кількості
+        document.querySelectorAll('.cart-item-decrease').forEach(btn => {
+          btn.addEventListener('click', function () {
+            const index = parseInt(this.getAttribute('data-index'));
+            if (cart[index].quantity > 1) {
+              cart[index].quantity--;
+              localStorage.setItem('cart', JSON.stringify(cart));
+              renderCart();
+            }
+          });
+        });
+
+        document.querySelectorAll('.cart-item-increase').forEach(btn => {
+          btn.addEventListener('click', function () {
+            const index = parseInt(this.getAttribute('data-index'));
+            cart[index].quantity++;
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+          });
+        });
+
+        document.querySelectorAll('.cart-item-remove').forEach(btn => {
+          btn.addEventListener('click', function () {
+            const index = parseInt(this.getAttribute('data-index'));
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+          });
+        });
+      }
+
+      // Синхронізація select з радіо-кнопками
+      const productSelect = document.getElementById('product-select-template--19430082248756__main-8689954488372');
+      if (productSelect) {
+        productSelect.addEventListener('change', function () {
+          const selectedVariantId = this.value;
+          // Оновлюємо радіо-кнопку
+          const radio = productForm.querySelector(`input.block-swatch__radio[variant-id="${selectedVariantId}"]`);
+          if (radio) {
+            radio.checked = true;
+            // Оновлюємо input[name="id"]
+            const hiddenInput = productForm.querySelector('input[name="id"]');
+            if (hiddenInput) {
+              hiddenInput.value = selectedVariantId;
+              hiddenInput.removeAttribute('disabled');
+            }
+          }
+        });
+      }
+
+      // Синхронізація радіо-кнопок з select
+      document.querySelectorAll('input.block-swatch__radio').forEach(radio => {
+        radio.addEventListener('change', function () {
+          if (this.checked) {
+            const variantId = this.getAttribute('variant-id');
+            // Оновлюємо select
+            if (productSelect && variantId) {
+              productSelect.value = variantId;
+            }
+            // Оновлюємо input[name="id"]
+            const hiddenInput = productForm.querySelector('input[name="id"]');
+            if (hiddenInput) {
+              hiddenInput.value = variantId;
+              hiddenInput.removeAttribute('disabled');
+            }
+          }
+        });
+      });
+
+      // Обробка кнопки "Додати до кошика"
+      if (addToCartButton) {
+        addToCartButton.addEventListener('click', function (e) {
+          e.preventDefault();
+
+          let variantId = null;
+
+          // Спочатку шукаємо в select
+          if (productSelect && productSelect.value) {
+            variantId = productSelect.value;
+          }
+
+          // Якщо не знайшли в select, шукаємо обрану радіо-кнопку
+          if (!variantId) {
+            const selectedRadio = productForm.querySelector('input.block-swatch__radio:checked, input[type="radio"][name="option1"]:checked');
+            if (selectedRadio) {
+              variantId = selectedRadio.getAttribute('variant-id');
+            }
+          }
+
+          // Якщо не знайшли через радіо, шукаємо в input[name="id"]
+          if (!variantId) {
+            variantId = productForm.querySelector('input[name="id"]:not([disabled])')?.value ||
+              productForm.querySelector('input[name="id"]')?.value;
+          }
+
+          const quantity = parseInt(quantityInput.value) || 1;
+          const productId = productForm.querySelector('input[name="product-id"]')?.value;
+
+          if (!variantId) {
+            alert('Будь ласка, оберіть варіант продукту');
+            return;
+          }
+
+          // Переконуємося, що variantId - це рядок
+          const variantIdStr = String(variantId);
+
+          const cartItem = {
+            variantId: variantIdStr,
+            productId: productId,
+            quantity: quantity,
+            productName: getProductName(),
+            timestamp: Date.now()
+          };
+
+          console.log('Adding to cart:', cartItem, 'Variant:', variantPrices[variantIdStr]);
+
+          // Різні варіанти (1, 2, 3, 4 пляшки) - це окремі товари, тому завжди додаємо як новий товар
+          // Навіть якщо variantId однаковий, додаємо як окремий товар
+          cart.push(cartItem);
+
+          localStorage.setItem('cart', JSON.stringify(cart));
+          renderCart();
+
+          // Відкриваємо кошик
+          const miniCart = document.getElementById('mini-cart');
+          if (miniCart) {
+            miniCart.setAttribute('open', '');
+          }
+        });
+      }
+
+      // Модальне вікно
+      const orderModalOverlay = document.getElementById('order-modal-overlay');
+      const orderModal = document.getElementById('order-modal');
+      const closeOrderModal = document.getElementById('close-order-modal');
+      const checkoutButtonCart = document.getElementById('checkout-button-cart');
+      const customerOrderFormModal = document.getElementById('customer-order-form-modal');
+
+      // Функція для відкриття модального вікна
+      function openOrderModal() {
+        if (orderModalOverlay) {
+          orderModalOverlay.style.display = 'block';
+          document.body.style.overflow = 'hidden'; // Блокуємо прокрутку фону
+        }
+      }
+
+      // Функція для закриття модального вікна
+      function closeOrderModalFunc() {
+        if (orderModalOverlay) {
+          orderModalOverlay.style.display = 'none';
+          document.body.style.overflow = ''; // Відновлюємо прокрутку
+        }
+      }
+
+      // Відкриття модального вікна при натисканні "Замовити"
+      if (checkoutButtonCart) {
+        checkoutButtonCart.addEventListener('click', function () {
+          if (cart.length === 0) {
+            alert('Ваш кошик порожній');
+            return;
+          }
+          openOrderModal();
+        });
+      }
+
+      // Закриття модального вікна
+      if (closeOrderModal) {
+        closeOrderModal.addEventListener('click', closeOrderModalFunc);
+      }
+
+      // Закриття при кліку на затемнений фон
+      if (orderModalOverlay) {
+        orderModalOverlay.addEventListener('click', function (e) {
+          if (e.target === orderModalOverlay) {
+            closeOrderModalFunc();
+          }
+        });
+      }
+
+      // Закриття при натисканні Escape
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && orderModalOverlay && orderModalOverlay.style.display === 'block') {
+          closeOrderModalFunc();
+        }
+      });
+
+      // Обробка форми замовлення в модальному вікні
+      if (customerOrderFormModal) {
+        customerOrderFormModal.addEventListener('submit', function (e) {
+          e.preventDefault();
+
+          const customerName = document.getElementById('customer-name-modal').value.trim();
+          const customerPhone = document.getElementById('customer-phone-modal').value.trim();
+
+          if (!customerName || !customerPhone) {
+            alert('Будь ласка, заповніть всі поля');
+            return;
+          }
+
+          const phoneRegex = /^\+?[0-9]{10,15}$/;
+          if (!phoneRegex.test(customerPhone.replace(/\s/g, ''))) {
+            alert('Будь ласка, введіть правильний номер телефону');
+            return;
+          }
+
+          const orderData = {
+            customer: {
+              name: customerName,
+              phone: customerPhone
+            },
+            cart: cart,
+            total: cart.reduce((sum, item) => {
+              const variant = variantPrices[String(item.variantId)];
+              return sum + (variant ? variant.price * item.quantity : 0);
+            }, 0),
+            timestamp: new Date().toISOString()
+          };
+
+          console.log('Дані замовлення:', orderData);
+
+          alert('Дякуємо за замовлення! Ми зв\'яжемося з вами найближчим часом.');
+
+          cart = [];
+          localStorage.removeItem('cart');
+          customerOrderFormModal.reset();
+          renderCart();
+          closeOrderModalFunc();
+
+          // Закриваємо кошик
+          const miniCart = document.getElementById('mini-cart');
+          if (miniCart) {
+            miniCart.removeAttribute('open');
+          }
+        });
+      }
+
+      // Початкове відображення кошика
+      renderCart();
+
+      // Відстежуємо зміни в localStorage (якщо кошик змінився в іншій вкладці)
+      window.addEventListener('storage', function (e) {
+        if (e.key === 'cart') {
+          cart = JSON.parse(e.newValue) || [];
+          renderCart();
+        }
+      });
+    });
+  </script>
 </body>
 
 <!-- Mirrored from forchics.com/products/lash-serum by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 12 Nov 2025 00:52:23 GMT -->
