@@ -12852,9 +12852,6 @@ header--bordered " role="banner">
               productForm.querySelector('input[name="id"]')?.value;
           }
 
-          const quantity = parseInt(quantityInput.value) || 1;
-          const productId = productForm.querySelector('input[name="product-id"]')?.value;
-
           if (!variantId) {
             alert('Будь ласка, оберіть варіант продукту');
             return;
@@ -12862,6 +12859,19 @@ header--bordered " role="banner">
 
           // Переконуємося, що variantId - це рядок
           const variantIdStr = String(variantId);
+          
+          // Визначаємо кількість з назви варіанту (наприклад, "4 упаковки" → 4)
+          const variant = variantPrices[variantIdStr];
+          let quantity = 1;
+          if (variant && variant.name) {
+            // Витягуємо число з назви варіанту (наприклад, "4 упаковки" → 4)
+            const match = variant.name.match(/(\d+)/);
+            if (match) {
+              quantity = parseInt(match[1]) || 1;
+            }
+          }
+
+          const productId = productForm.querySelector('input[name="product-id"]')?.value;
 
           const cartItem = {
             variantId: variantIdStr,
